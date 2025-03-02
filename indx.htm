@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ごはんうさぎの神経衰弱</title>
+  <style>
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #fffaf0;
+      margin: 0;
+      padding: 20px;
+      position: relative;
+    }
+    h1 {
+      color: #d2691e;
+      margin-bottom: 10px;
+    }
+    .game-info {
+      margin-bottom: 20px;
+      font-size: 18px;
+    }
+    .game-board {
+      display: grid;
+      grid-template-columns: repeat(4, 200px);
+      grid-gap: 10px;
+      margin-bottom: 20px;
+    }
+    .card {
+      width: 200px;
+      height: 200px;
+      background-color: #ffdab9;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.3s ease-in-out;
+      position: relative;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
+      display: none;
+    }
+    .card.flipped img {
+      display: block;
+    }
+    .card.matched {
+      background-color: #98fb98;
+      box-shadow: 0 0 15px rgba(152, 251, 152, 0.8);
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #d2691e;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #a0522d;
+    }
+  </style>
+</head>
+<body>
+  <h1>ごはんうさぎの神経衰弱</h1>
+  <button id="bgm-btn">🎵 BGM ON/OFF</button>
+  <div class="game-info">
+    試行回数: <span id="attempts">0</span> | 
+    ペア: <span id="pairs">0</span>/8
+  </div>
+  <div class="game-board" id="game-board"></div>
+  <button id="restart-btn">ゲームをリスタート</button>
+
+  <audio id="bgm" src="usabgm.mp3" loop></audio>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const gameBoard = document.getElementById('game-board');
+      const attemptsElem = document.getElementById('attempts');
+      const pairsElem = document.getElementById('pairs');
+      const restartBtn = document.getElementById('restart-btn');
+      const bgm = document.getElementById('bgm');
+      const bgmBtn = document.getElementById('bgm-btn');
+
+      const images = [
+        'carrot.jpg', 'lettuce.jpg', 'apple.jpg', 'straw.jpg',
+        'cabbage.jpg', 'pellet.jpg', 'banana.jpg', 'hay.jpg'
+      ];
+
+      let cards = [];
+      let flippedCards = [];
+      let matchedPairs = 0;
+      let attempts = 0;
+      let canFlip = true;
+      let bgmPlaying = false;
+
+      function initGame() {
+        cards = [];
+        flippedCards = [];
+        matchedPairs = 0;
+        attempts = 0;
+        canFlip = true;
+
+        attemptsElem.textContent = attempts;
+        pairsElem.textContent = matchedPairs;
+
+        const cardValues = [...images, ...images];
+        cardValues.sort(() => Math.random() - 0.5);
+
+        gameBoard.innerHTML = '';
+
+        cardValues.forEach(imageSrc => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.dataset.value = imageSrc;
+
+          const img = document.createElement('img');
+          img.src = imageSrc;
+          card.appendChild(img);
+
+          card.addEventListener('click', flipCard);
+          gameBoard.appendChild(card);
+          cards.push(card);
+        });
+      }
+
+      function flipCard() {
+        if (!canFlip || this.classList.contains('flipped') || this.classList.contains('matched')) return;
+
+        this.classList.add('flipped');
+        flippedCards.push(this);
+
+        if (flippedCards.length === 2) {
+          attempts++;
+          attemptsElem.textContent = attempts;
+
+          if (flippedCards[0].dataset.value === flippedCards[1].dataset.value) {
+            matchedPairs++;
+            pairsElem.textContent = matchedPairs;
+
+            flippedCards.forEach(card => card.classList.add('matched'));
+            flippedCards = [];
+
+            if (matchedPairs === images.length) {
+              setTimeout(() => alert(`ゲームクリア！試行回数: ${attempts}回`), 500);
+            }
+          } else {
+            canFlip = false;
+            setTimeout(() => {
+              flippedCards.forEach(card => card.classList.remove('flipped'));
+              flippedCards = [];
+              canFlip = true;
+            }, 1000);
+          }
+        }
+      }
+
+      function toggleBGM() {
+        if (bgmPlaying) {
+          bgm.pause();
+        } else {
+          bgm.play();
+        }
+        bgmPlaying = !bgmPlaying;
+      }
+
+      function startBGM() {
+        if (!bgmPlaying) {
+          bgm.play();
+          bgmPlaying = true;
+        }
+        document.removeEventListener('click', startBGM);
+      }
+
+      bgmBtn.addEventListener('click', toggleBGM);
+      document.addEventListener('click', startBGM);
+      restartBtn.addEventListener('click', initGame);
+
+      initGame();
+    });
+  </script>
+</body>
+</html>

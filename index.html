@@ -25,13 +25,15 @@
     }
     .game-board {
       display: grid;
-      grid-template-columns: repeat(4, 200px);
-      grid-gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 10px;
+      width: 100%;
+      max-width: 800px;
       margin-bottom: 20px;
     }
     .card {
-      width: 200px;
-      height: 200px;
+      width: 100%;
+      aspect-ratio: 1;
       background-color: #ffdab9;
       border-radius: 10px;
       display: flex;
@@ -40,6 +42,7 @@
       cursor: pointer;
       transition: transform 0.3s ease-in-out;
       position: relative;
+      overflow: hidden;
     }
     .card:hover {
       transform: scale(1.05);
@@ -154,7 +157,21 @@
             flippedCards = [];
 
             if (matchedPairs === images.length) {
-              setTimeout(() => alert(`ゲームクリア！試行回数: ${attempts}回`), 500);
+              let message;
+              if (attempts <= 10) {
+                message = `クリアおめでとう！凄い！うさごはんの神うさ！ (試行回数: ${attempts}回)`;
+              } else if (attempts <= 15) {
+                message = `クリアおめでとう！めちゃ早い！早食いうさぎうさ！ (試行回数: ${attempts}回)`;
+              } else if (attempts <= 20) {
+                message = `クリアおめでとう！大分いい感じ！美味しくめしあがれうさ！ (試行回数: ${attempts}回)`;
+              } else if (attempts <= 25) {
+                message = `クリアおめでとう！普通うさね！いただきますうさ！ (試行回数: ${attempts}回)`;
+              } else if (attempts <= 30) {
+                message = `クリアおめでとう！まったりうさね！ごはんが待ってるうさ！ (試行回数: ${attempts}回)`;
+              } else {
+                message = `クリアおめでとう！苦戦したうさね？おつかれさまうさ！ (試行回数: ${attempts}回)`;
+              }
+              setTimeout(() => alert(message), 500);
             }
           } else {
             canFlip = false;
